@@ -1,0 +1,13 @@
+config:
+  phases:
+    - duration: 60
+      arrivalRate: 5
+  http:
+    timeout: 29
+scenarios:
+  - flow:
+      - post:
+          url: /
+          json:
+            fullName: "little john"
+            age: "10"
