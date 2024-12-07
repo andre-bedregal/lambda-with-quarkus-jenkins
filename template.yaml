@@ -1,0 +1,121 @@
+  AWSTemplateFormatVersion: '2010-09-09'
+  Transform: AWS::Serverless-2016-10-31
+  Description: AWS Serverless Quarkus HTTP - lambda-with-quarkus-2-1.0.0-SNAPSHOT
+  Globals:
+    Api:
+      EndpointConfiguration: REGIONAL
+      BinaryMediaTypes:
+        - "*/*"
+
+  Resources:
+
+    MyServerlessTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: "id"
+            AttributeType: "S"
+          - AttributeName: "itemType"
+            AttributeType: "S"
+          - AttributeName: "createdAt"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "id"
+            KeyType: "HASH"
+          - AttributeName: "itemType"
+            KeyType: "RANGE"
+        GlobalSecondaryIndexes:
+          - IndexName: "type_index"
+            KeySchema:
+              - AttributeName: "itemType"
+                KeyType: "HASH"
+              - AttributeName: "createdAt"
+                KeyType: "RANGE"
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+        TableName: "MyServerlessTable"
+
+    ServerlessRestApiJvm:
+      Type: AWS::Serverless::Api
+      Properties:
+        StageName: prod
+
+    ServerlessRestApiNative:
+      Type: AWS::Serverless::Api
+      Properties:
+        StageName: prod
+
+    LambdaWithQuarkusJvm:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest
+        FunctionName: lambda-with-quarkus-jvm
+        Runtime: java21
+        CodeUri: target/function.zip
+        MemorySize: 512
+        Policies:
+          - AWSLambdaBasicExecutionRole
+          - DynamoDBCrudPolicy:
+              TableName: !Ref MyServerlessTable
+        Timeout: 15
+        Environment:
+          Variables:
+            TABLE_NAME: !Ref MyServerlessTable
+        Events:
+          GetResource:
+            Type: Api
+            Properties:
+              RestApiId:
+                Ref: ServerlessRestApiJvm
+              Path: /{proxy+}
+              Method: any
+
+    LambdaWithQuarkusNative:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: not.used.in.provided.runtime
+        FunctionName: lambda-with-quarkus-native
+        Runtime: provided.al2023
+        CodeUri: target-native/function.zip
+        MemorySize: 386
+        Policies:
+          - AWSLambdaBasicExecutionRole
+          - DynamoDBCrudPolicy:
+              TableName: !Ref MyServerlessTable
+        Timeout: 15
+        Environment:
+          Variables:
+            TABLE_NAME: !Ref MyServerlessTable
+            DISABLE_SIGNAL_HANDLERS: true
+        Events:
+          GetResource:
+            Type: Api
+            Properties:
+              RestApiId:
+                Ref: ServerlessRestApiNative
+              Path: /{proxy+}
+              Method: any
+
+
+  Outputs:
+    LambdaWithQuarkusJvmApi:
+      Description: URL for the JVM version of the application
+      Value: !Sub 'https://${ServerlessRestApiJvm}.execute-api.${AWS::Region}.amazonaws.com/prod/students'
+      Export:
+        Name: LambdaWithQuarkusJvmApi
+    LambdaWithQuarkusNativeApi:
+      Description: URL for the Native version of the application
+      Value: !Sub 'https://${ServerlessRestApiNative}.execute-api.${AWS::Region}.amazonaws.com/prod/students'
+      Export:
+        Name: LambdaWithQuarkusNativeApi
+    # LocalStackLambdaWithQuarkusJvmApi:
+    #   Description: URL for the JVM version of the application (LocalStack)
+    #   Value: !Sub 'http://localhost:4566/_aws/execute-api/${ServerlessRestApiJvm}/prod/students'
+    #   Export:
+    #     Name: LocalStackLambdaWithQuarkusJvmApi
+    # LocalStackLambdaWithQuarkusNativeApi:
+    #   Description: URL for the Native version of the application (LocalStack)
+    #   Value: !Sub 'http://localhost:4566/_aws/execute-api/${ServerlessRestApiNative}/prod/students'
+    #   Export:
+    #     Name: LocalStackLambdaWithQuarkusNativeApi
