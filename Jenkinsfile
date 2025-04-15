@@ -1,7 +1,11 @@
 pipeline {
+    environment {
+        JAVA_TOOL_OPTIONS = "-Duser.home=/var/maven"
+    }
     agent {
         docker {
             image 'andre-image:latest'
+            args '-v /opt/maven:/var/maven/.m2:z -e MAVEN_CONFIG=/var/maven/.m2'
         }
     }
     stages {
