@@ -16,7 +16,7 @@ pipeline {
         // }
         stage('Build Native') {
             steps {
-                sh 'mvn install -Dnative -DskipTests -Dquarkus.native.container-build=true'
+                sh 'mvn install -Dnative -DskipTests'
             }
         }
         stage('SAM build') {
