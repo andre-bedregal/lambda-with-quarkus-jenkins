@@ -9,16 +9,16 @@ pipeline {
         }
     }
     stages {
-        // stage('Build JVM') {
-        //     steps {
-        //         sh 'mvn install -DskipTests'
-        //     }
-        // }
-        stage('Build Native') {
+        stage('Build JVM') {
             steps {
-                sh 'mvn install -Dnative -DskipTests'
+                sh 'mvn install -DskipTests'
             }
         }
+        // stage('Build Native') {
+        //     steps {
+        //         sh 'mvn install -Dnative -DskipTests'
+        //     }
+        // }
         stage('SAM build') {
             steps {
                 sh 'sam build'
