@@ -7,12 +7,12 @@ pipeline {
     stages {
         stage('Build JVM') {
             steps {
-                sh './mvnw install -DskipTests'
+                sh 'mvn install -DskipTests'
             }
         }
         stage('Build Native') {
             steps {
-                sh './mvnw install -Dnative -DskipTests'
+                sh 'mvn install -Dnative -DskipTests'
             }
         }
         stage('SAM build') {
