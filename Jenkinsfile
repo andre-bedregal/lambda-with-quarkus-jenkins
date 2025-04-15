@@ -9,14 +9,14 @@ pipeline {
         }
     }
     stages {
-        stage('Build JVM') {
-            steps {
-                sh 'mvn install -DskipTests'
-            }
-        }
+        // stage('Build JVM') {
+        //     steps {
+        //         sh 'mvn install -DskipTests'
+        //     }
+        // }
         stage('Build Native') {
             steps {
-                sh 'mvn install -Dnative -DskipTests'
+                sh 'mvn install -Dnative -DskipTests -Dquarkus.native.container-build=true'
             }
         }
         stage('SAM build') {
