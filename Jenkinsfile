@@ -14,11 +14,11 @@ pipeline {
                 sh 'mvn install -DskipTests'
             }
         }
-        // stage('Build Native') {
-        //     steps {
-        //         sh 'mvn install -Dnative -DskipTests'
-        //     }
-        // }
+        stage('Build Native') {
+            steps {
+                sh 'mvn install -Dnative -DskipTests'
+            }
+        }
         stage('SAM build') {
             steps {
                 sh 'sam build'
